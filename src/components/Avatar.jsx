@@ -1,13 +1,11 @@
 import React, { useRef, useEffect, useState } from 'react'
-import { useAnimations, useFBX, useGLTF } from '@react-three/drei'
+import { useAnimations, useFBX, useGLTF, useScroll } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber';
 import { motion } from 'framer-motion-3d';
 import * as THREE from 'three';
 import { useControls } from 'leva';
-import { useGlobalUI } from '../context/GlobalUIContext';
 
 export const Avatar = (props) => {
-    const [ initialLoad, setInitialLoad ] = useState(true);
     const [ materialSettings, setMaterialSettings ] = useState({ wireframe: true, color: new THREE.Color(0x000000), emissive: new THREE.Color(0x000000) });
     const { animation } = props;
     const group = useRef();
@@ -16,6 +14,10 @@ export const Avatar = (props) => {
     const { animations: standUpAnimation } = useFBX('animations/StandUp.fbx');
     const { animations: idleAnimation } = useFBX('animations/Idle.fbx');
     const { animations: walkAnimation } = useFBX('animations/Walk.fbx');
+
+    const data = useScroll();
+    const prevScrollOffset = useRef(null);
+
     const controls = useControls({
         headFollow: false,
         cursorFollow: false,
@@ -34,6 +36,21 @@ export const Avatar = (props) => {
     , group);
 
     useFrame((state) => {
+        let currentAnimation = actions[animation];
+
+        if (!currentAnimation) {
+            console.error(`No animation found for key: ${animation}`);
+            return;
+        }
+
+        if (animation == "Walk" && data.offset !== prevScrollOffset.current) {
+            let animationDuration = currentAnimation._clip.duration;
+            let newTime = (data.offset * data.pages) * animationDuration;
+            currentAnimation.time = newTime % animationDuration;
+
+            prevScrollOffset.current = data.offset;
+        }
+
         if (controls.headFollow) {
             group.current.getObjectByName("Head").lookAt(state.camera.position);
         }
@@ -45,14 +62,16 @@ export const Avatar = (props) => {
     });
 
     useEffect(() => {
-        if (initialLoad) {
-            setInitialLoad(false);
+        if (animation == "Walk") {
             actions[animation].reset().play();
-        } else {
-            actions[animation].reset().fadeIn(1).play();
+            actions[animation].paused = true;
         }
+        if (animation == "Idle") {
+            actions[animation].reset().fadeIn(.4).play();
+        }
+
         return () => {
-            actions[animation].reset().fadeOut(1);
+            actions[animation].reset().fadeOut(.4);
         }
     }, [animation]);
 
@@ -80,7 +99,7 @@ export const Avatar = (props) => {
             {...props} 
             ref={group} 
             dispose={null} 
-            position={[0,0,-3]
+            position={[.5,0,2]
         }>
             <group rotation-x={-Math.PI/2}>
                 <primitive object={nodes.Hips} />

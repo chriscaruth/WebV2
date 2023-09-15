@@ -11,8 +11,8 @@ const App = () =>
 {
     return (
         <> 
-            <Canvas shadows camera={{ position: [0, 1, 4], rotation: [0, 0, 0], fov: 60 }}>
-                <ScrollControls pages={1} damping={0.1} enabled={true}>
+            <Canvas shadows camera={{ position: [0, 1, 6], rotation: [0, 0, 0], fov: 60 }}>
+                <ScrollControls pages={4} damping={0.1} enabled={true}>
                     <Experience />
                     <Scroll html>
                         <GlobalUIProvider>
@@ -31,14 +31,14 @@ const CameraController = () => {
     const { state } = useGlobalUI();
   
     // Current position of avatar, probably need to keep track of this position in the globalUI.
-    const targetPosition = new THREE.Vector3(0, 0, -3);
+    const targetPosition = new THREE.Vector3(0, 0, 0);
     const radius = camera.position.distanceTo(targetPosition);
 
     useEffect(() => {
-        const phi = THREE.MathUtils.lerp(Math.PI / 3.14, Math.PI / 2.4, state.scrollOffset / 1000);
-        const theta = THREE.MathUtils.lerp(Math.PI / 2, 2 * Math.PI + Math.PI / 2, state.scrollOffset / 1000);
+        const phi = THREE.MathUtils.lerp(Math.PI / 3.14, Math.PI / 2.6, Math.min(state.scrollOffset * 4, 1000) / 1000);
+        const theta = THREE.MathUtils.lerp(Math.PI * 1.1, Math.PI / 2, Math.min(state.scrollOffset * 4, 1000) / 1000);
 
-        const newFOV = THREE.MathUtils.lerp(60, 30, state.scrollOffset / 1000);
+        const newFOV = THREE.MathUtils.lerp(90, 40, Math.min(state.scrollOffset * 4, 1000) / 1000);
         camera.fov = newFOV;
         camera.updateProjectionMatrix();
 

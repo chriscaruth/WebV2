@@ -1,14 +1,20 @@
-import { ContactShadows, Environment, OrbitControls, Sky } from "@react-three/drei";
+import { ContactShadows, Environment, useScroll } from "@react-three/drei";
 import { Avatar } from './Avatar'
-import { useControls } from "leva";
+import { useFrame } from "@react-three/fiber";
+import { useState } from "react";
 
 export const Experience = () => {
-    const { animation } = useControls({
-        animation: {
-            value: "Walk",
-            options: ["Typing", "StandUp", "Idle", "Walk"]
+    const [ animation, setAnimation ] = useState("Walk");
+    const data = useScroll();
+
+    useFrame(() => {
+        if ((data.offset * data.pages) > 1) {
+            setAnimation("Idle");
         }
-    })
+        else {
+            setAnimation("Walk");
+        }
+    });
 
     return (
         <>

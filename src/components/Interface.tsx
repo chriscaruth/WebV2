@@ -14,7 +14,7 @@ export const Interface = () => {
       scrollY.set(state.scrollOffset);
     }, [state.scrollOffset, scrollY]);
   
-    const opacityTransformer = useTransform(scrollY, [0, 1000], [1, 0]);
+    const opacityTransformer = useTransform(scrollY, [0, 150], [1, 0]);
 
     return (
         <motion.div style={{ background: 'white', opacity: opacityTransformer }} className={'h-screen w-screen relative'}>
